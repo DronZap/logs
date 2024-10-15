@@ -1,0 +1,41 @@
+- name: NGINX
+  hosts: web
+  become: true
+
+  tasks:
+    - name: update
+      apt:
+        update_cache=yes
+    
+    - name: install_nginx
+      apt:
+        name: nginx
+        state: latest
+      tags:
+        - nginx-package
+    - name: update nginx.conf
+      template:
+        src: /home/ubuntu/LOGS/ansible/nginx.conf
+        dest: /etc/nginx/nginx.conf
+    - name: Restart nginx
+      shell:
+          "systemctl restart nginx"
+      tags:
+        - restart_nginx
+
+- name: LOGS
+  hosts: log
+  become: true
+ 
+  tasks:
+    - name: Create syslog.conf
+      template:
+        src: /home/ubuntu/LOGS/ansible/rsyslog.conf
+        dest: /etc/rsyslog.conf
+      tags:
+        - rsyslog-configuration
+    - name: Restart rsyslog
+      shell:
+          "systemctl restart rsyslog"    
+      tags:
+        - restart_rsyslog
